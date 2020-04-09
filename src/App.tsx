@@ -1,24 +1,48 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState, useRef } from "react";
+import "./App.css";
+
+import {
+  getStartingBoard,
+  getNextBoard,
+  Board,
+  CellState,
+  getGameBoard,
+} from "./engine";
 
 function App() {
+  const [generation, setGeneration] = useState<number>(0);
+
+  const boardRef = useRef<Board>();
+  boardRef.current = boardRef.current || getStartingBoard(1200, 140);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const nextBoard = getNextBoard(boardRef.current || []);
+      boardRef.current = nextBoard;
+      setGeneration((generation) => generation + 1);
+    }, 200);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const gameBoard = getGameBoard(boardRef.current);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="board">
+        {gameBoard.map((row) => {
+          return (
+            <div className="row">
+              {row.map((cell) => (
+                <div
+                  className={cell === CellState.Live ? "liveCell" : "diedCell"}
+                />
+              ))}
+            </div>
+          );
+        })}
+      </div>
+      <a>generation: {generation}</a>
     </div>
   );
 }
