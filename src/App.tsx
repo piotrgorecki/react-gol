@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import "./App.css";
 
 import { getStartingBoard, getNextBoard, Board, getGameBoard } from "./engine";
@@ -21,6 +21,11 @@ function App() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleReset = useCallback(() => {
+    boardRef.current = getStartingBoard(1000, 100);
+    setGeneration(1);
+  }, []);
+
   const gameBoard = getGameBoard(boardRef.current);
 
   return (
@@ -36,7 +41,12 @@ function App() {
           );
         })}
       </div>
-      <a>generation: {generation}</a>
+      <div className="sideMenu">
+        <button type="reset" className="resetButton" onClick={handleReset}>
+          Reset
+        </button>
+        <a>generation: {generation}</a>
+      </div>
     </div>
   );
 }
