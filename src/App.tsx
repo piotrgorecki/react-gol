@@ -1,26 +1,22 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./App.css";
 
-import {
-  getStartingBoard,
-  getNextBoard,
-  Board,
-  CellState,
-  getGameBoard,
-} from "./engine";
+import { getStartingBoard, getNextBoard, Board, getGameBoard } from "./engine";
+
+const CellClassName = ["diedCell", "liveCell"];
 
 function App() {
   const [generation, setGeneration] = useState<number>(0);
 
   const boardRef = useRef<Board>();
-  boardRef.current = boardRef.current || getStartingBoard(1200, 140);
+  boardRef.current = boardRef.current || getStartingBoard(1000, 100);
 
   useEffect(() => {
     const interval = setInterval(() => {
       const nextBoard = getNextBoard(boardRef.current || []);
       boardRef.current = nextBoard;
       setGeneration((generation) => generation + 1);
-    }, 200);
+    }, 250);
 
     return () => clearInterval(interval);
   }, []);
@@ -34,9 +30,7 @@ function App() {
           return (
             <div className="row">
               {row.map((cell) => (
-                <div
-                  className={cell === CellState.Live ? "liveCell" : "diedCell"}
-                />
+                <div className={CellClassName[cell]} />
               ))}
             </div>
           );
