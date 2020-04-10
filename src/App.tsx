@@ -47,6 +47,7 @@ function App() {
         })}
       </div>
       <div className="sideMenu">
+        <h2>The Game of Life</h2>
         <button type="reset" className="resetButton" onClick={handleReset}>
           Reset
         </button>
