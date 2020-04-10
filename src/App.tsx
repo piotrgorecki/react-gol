@@ -1,28 +1,39 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import "./App.css";
 
+import "./App.css";
 import { getStartingBoard, getNextBoard, Board, getGameBoard } from "./engine";
 
-const CellClassName = ["diedCell", "liveCell"];
+const DiedCell = <div className="diedCell" />;
+const LiveCell = <div className="liveCell" />;
+const Cell = [DiedCell, LiveCell];
+
+const BOARD_EDGE_SIZE = 120;
+const STARTING_POPULATION_SIZE = 1400;
+const INTERVAL = 150; //ms
 
 function App() {
   const [generation, setGeneration] = useState<number>(0);
 
   const boardRef = useRef<Board>();
-  boardRef.current = boardRef.current || getStartingBoard(1000, 100);
+  boardRef.current =
+    boardRef.current ||
+    getStartingBoard(STARTING_POPULATION_SIZE, BOARD_EDGE_SIZE);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const intervalId = setInterval(() => {
       const nextBoard = getNextBoard(boardRef.current || []);
       boardRef.current = nextBoard;
       setGeneration((generation) => generation + 1);
-    }, 250);
+    }, INTERVAL);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleReset = useCallback(() => {
-    boardRef.current = getStartingBoard(1000, 100);
+    boardRef.current = getStartingBoard(
+      STARTING_POPULATION_SIZE,
+      BOARD_EDGE_SIZE
+    );
     setGeneration(1);
   }, []);
 
@@ -32,20 +43,14 @@ function App() {
     <div className="App">
       <div className="board">
         {gameBoard.map((row) => {
-          return (
-            <div className="row">
-              {row.map((cell) => (
-                <div className={CellClassName[cell]} />
-              ))}
-            </div>
-          );
+          return <div className="row">{row.map((cell) => Cell[cell])}</div>;
         })}
       </div>
       <div className="sideMenu">
         <button type="reset" className="resetButton" onClick={handleReset}>
           Reset
         </button>
-        <a>generation: {generation}</a>
+        <p>generation: {generation}</p>
       </div>
     </div>
   );

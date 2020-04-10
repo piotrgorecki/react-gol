@@ -72,13 +72,16 @@ const computeNextCellState = (
   cell: CellState
 ): CellState => {
   if (cell === CellState.Live) {
-    if (numberOfLiveNeighbors < 2) return CellState.Die;
-    if (numberOfLiveNeighbors > 3) return CellState.Die;
+    if (numberOfLiveNeighbors < 2 || numberOfLiveNeighbors > 3) {
+      return CellState.Die;
+    }
+
     return CellState.Live;
-  } else {
-    if (numberOfLiveNeighbors === 3) return CellState.Live;
-    else return CellState.Die;
   }
+
+  if (numberOfLiveNeighbors === 3) return CellState.Live;
+
+  return CellState.Die;
 };
 
 export const getNextBoard = (board: Board): Board => {
