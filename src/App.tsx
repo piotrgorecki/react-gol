@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 
 import "./App.css";
-import { getStartingBoard, getNextBoard, Board, getGameBoard } from "./engine";
+import { getStartingBoard, getNextBoard, Board } from "./engine";
 
 const DiedCell = <div className="diedCell" />;
 const LiveCell = <div className="liveCell" />;
@@ -37,12 +37,11 @@ function App() {
     setGeneration(1);
   }, []);
 
-  const gameBoard = getGameBoard(boardRef.current);
-
   return (
     <div className="App">
       <div className="board">
-        {gameBoard.map((row) => {
+        {boardRef.current.map((row) => {
+          // @ts-ignore
           return <div className="row">{row.map((cell) => Cell[cell])}</div>;
         })}
       </div>

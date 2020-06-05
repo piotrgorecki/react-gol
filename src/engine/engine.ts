@@ -4,16 +4,15 @@ export enum CellState {
   Die = 0,
   Live = 1,
 }
-export type Board = Array<CellState>;
+
+export type Board = Array<Array<CellState>>;
+export type Position = [number, number]; // row, col
 
 export const getEmptyBoard = (edgeSize: number): Board => {
-  const board: Board = [];
-  const size = edgeSize * edgeSize;
-
-  for (let i = 0; i < size; i++) {
-    board[i] = CellState.Die;
+  let board: Board = [];
+  for (let r = 0; r < edgeSize; r++) {
+    board = [...board, new Array(edgeSize).fill(CellState.Die)];
   }
-
   return board;
 };
 
@@ -21,15 +20,18 @@ export const populateEmptyBoard = (
   numberOfCells: number,
   board: Board
 ): Board => {
-  let cell, cellIdx;
+  let cell, row, col;
+  const rows = board.length;
+  const cols = board[0].length;
 
   for (let i = 0; i < numberOfCells; i++) {
     do {
-      cellIdx = getRandomInt(0, board.length);
-      cell = board[cellIdx];
+      row = getRandomInt(0, rows);
+      col = getRandomInt(0, cols);
+      cell = board[row][col];
     } while (cell === CellState.Live);
 
-    board[cellIdx] = CellState.Live;
+    board[row][col] = CellState.Live;
   }
 
   return board;
@@ -50,19 +52,24 @@ export const getStartingBoard = (
  */
 export const getNumberOfLiveNeighbors = (
   board: Board,
-  position: number
+  [row, col]: Position
 ): number => {
-  let numberOfLiveNeighbors = 0;
-  const rowLength = Math.sqrt(board.length);
+  const maxIndex = board.length - 1;
 
-  numberOfLiveNeighbors += board[position - 1] || 0;
-  numberOfLiveNeighbors += board[position + 1] || 0;
-  numberOfLiveNeighbors += board[position - rowLength] || 0;
-  numberOfLiveNeighbors += board[position + rowLength] || 0;
-  numberOfLiveNeighbors += board[position - rowLength - 1] || 0;
-  numberOfLiveNeighbors += board[position - rowLength + 1] || 0;
-  numberOfLiveNeighbors += board[position + rowLength - 1] || 0;
-  numberOfLiveNeighbors += board[position + rowLength + 1] || 0;
+  const left = row - 1 >= 0 ? row - 1 : maxIndex;
+  const right = row + 1 <= maxIndex ? row + 1 : 0;
+  const up = col - 1 >= 0 ? col - 1 : maxIndex;
+  const down = col + 1 <= maxIndex ? col + 1 : 0;
+
+  let numberOfLiveNeighbors = 0;
+  numberOfLiveNeighbors += board[left][col] || 0;
+  numberOfLiveNeighbors += board[right][col] || 0;
+  numberOfLiveNeighbors += board[row][up] || 0;
+  numberOfLiveNeighbors += board[row][down] || 0;
+  numberOfLiveNeighbors += board[left][up] || 0;
+  numberOfLiveNeighbors += board[left][down] || 0;
+  numberOfLiveNeighbors += board[right][up] || 0;
+  numberOfLiveNeighbors += board[right][down] || 0;
 
   return numberOfLiveNeighbors;
 };
@@ -85,23 +92,20 @@ const computeNextCellState = (
 };
 
 export const getNextBoard = (board: Board): Board => {
-  const nextBoard: Board = [];
-  board.forEach((cell, idx) => {
-    const numberOfLiveNeighbors = getNumberOfLiveNeighbors(board, idx);
-    const nextCellState = computeNextCellState(numberOfLiveNeighbors, cell);
-    nextBoard[idx] = nextCellState;
+  const nextBoard: Board = new Array(board.length)
+    .fill(null)
+    .map(() => new Array(board.length));
+
+  board.forEach((row, rowIndex) => {
+    row.forEach((cell, colIndex) => {
+      const numberOfLiveNeighbors = getNumberOfLiveNeighbors(board, [
+        rowIndex,
+        colIndex,
+      ]);
+      const nextCellState = computeNextCellState(numberOfLiveNeighbors, cell);
+      nextBoard[rowIndex][colIndex] = nextCellState;
+    });
   });
 
   return nextBoard;
-};
-
-export const getGameBoard = (board: Board): Array<Board> => {
-  const edgeSize = Math.sqrt(board.length);
-  let gameBoard: Array<Board> = [];
-
-  for (let idx = 0; idx < board.length; idx += edgeSize) {
-    gameBoard.push(board.slice(idx, idx + edgeSize));
-  }
-
-  return gameBoard;
 };
